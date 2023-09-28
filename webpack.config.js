@@ -1,23 +1,24 @@
 const path = require("path");
 const HTMLPlugin = require("html-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin")
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     entry: {
-        index: "./src/index.tsx"
+        index: "./src/index.jsx", // Change the entry file extension to .jsx
     },
     mode: "production",
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
+                test: /\.jsx?$/, // Change the file extension to .jsx
                 use: [
                     {
-                        loader: "ts-loader",
+                        loader: "babel-loader", // Use babel-loader for JSX
                         options: {
-                            compilerOptions: { noEmit: false },
-                        }
-                    }],
+                            presets: ["@babel/preset-react"], // Add React preset
+                        },
+                    },
+                ],
                 exclude: /node_modules/,
             },
             {
@@ -25,9 +26,8 @@ module.exports = {
                 test: /\.css$/i,
                 use: [
                     "style-loader",
-                    "css-loader"
-                ]
-
+                    "css-loader",
+                ],
             },
         ],
     },
@@ -41,7 +41,7 @@ module.exports = {
         ...getHtmlPlugins(["index"]),
     ],
     resolve: {
-        extensions: [".tsx", ".ts", ".js"],
+        extensions: [".jsx", ".js"], // Update extensions to include .jsx
     },
     output: {
         path: path.join(__dirname, "dist/js"),
