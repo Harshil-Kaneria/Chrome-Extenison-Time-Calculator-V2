@@ -1,0 +1,16 @@
+{
+    "name": "Time Calculator V2",
+	"description": "A simple time calculator for estimation of time",
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "action": {
+        "default_title": "Time Calculator V2",
+        "default_popup": "js/index.html",
+        "default_icon": "icon.png"
+    },
+    "permissions": [
+		"notifications",
+        "storage",
+        "alarms"
+	]
+}
