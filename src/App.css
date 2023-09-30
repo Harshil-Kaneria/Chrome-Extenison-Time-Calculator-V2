@@ -1,5 +1,15 @@
+*,body{
+    padding: 0px;
+    margin: 0px;
+}
+
 .main_body{
+    max-width: 500px;
+    min-width: 500px;
     width: 500px;
+    max-height: 500px;
+    min-height: 500px;
     height: 500px;
-    background-color: green;
+    padding: 0px;
+    margin: 0px;
 }
