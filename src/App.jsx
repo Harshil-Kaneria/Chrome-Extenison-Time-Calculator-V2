@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { TimePicker,Progress,Input } from "antd";
-import { Row, Col, Container } from "react-bootstrap";
+import { TimePicker, Progress, Input } from "antd";
+import { Row, Col, Container, Card } from "react-bootstrap";
 import moment from "moment";
-
-const { Search } = Input;
-
-const gridStyle = {
-  width: "25%",
-  textAlign: "center",
-};
 
 const App = () => {
   const [startTime, setStartTime] = useState("09:00 AM");
@@ -40,7 +33,7 @@ const App = () => {
         <Container>
           <Row>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-3">
+              <div class="text-center mt-1">
                 <kbd>Start time</kbd>
               </div>
               <TimePicker
@@ -54,7 +47,7 @@ const App = () => {
               />
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-3">
+              <div class="text-center mt-1">
                 <kbd>Working time</kbd>
               </div>
               <TimePicker
@@ -68,7 +61,7 @@ const App = () => {
               />
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-3">
+              <div class="text-center mt-1">
                 <kbd>Break time</kbd>
               </div>
               <TimePicker
@@ -82,7 +75,7 @@ const App = () => {
               />
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-3">
+              <div class="text-center mt-1">
                 <kbd>Leave time (optional)</kbd>
               </div>
               <TimePicker
@@ -96,15 +89,71 @@ const App = () => {
             </Col>
           </Row>
           <hr className="mt-1 mb-1 hr_dashed" />
-          <Row>
-            <Col className="mt-1" xxl={12} xl={12} lg={12} md={12} sm={12} xs={12}><Input prefix="Finish at" suffix="06:00 PM" disabled /></Col>
-            <Col className="mt-1" xxl={12} xl={12} lg={12} md={12} sm={12} xs={12}><Input prefix="Remaining time" suffix="06:00 PM" disabled /></Col>
-            <Progress className="m-0" percent={50} size="small" status="active" />
-            <Col className="mt-1" xxl={12} xl={12} lg={12} md={12} sm={12} xs={12}><Input prefix="Remaining leave time" suffix="06:00 PM" disabled /></Col>
-            <Col className="mt-1" xxl={12} xl={12} lg={12} md={12} sm={12} xs={12}><Input prefix="Total working time" suffix="06:00 PM" disabled /></Col>
-            <Col className="mt-1" xxl={12} xl={12} lg={12} md={12} sm={12} xs={12}><Input prefix="Total access time" suffix="06:00 PM" disabled /></Col>
-            <Progress className="m-0" percent={100} size="small" status="active" />
-          </Row>
+          <Card bg="white" className="mt-1">
+            <Card.Header className="bg-white pt-1 pb-1">
+              <Progress
+                className="m-0"
+                percent={50}
+                size="small"
+                status="active"
+              />
+            </Card.Header>
+            <Card.Body className="p-1">
+              <Row>
+                <Col>
+                  <Input
+                    readOnly={true}
+                    prefix={<strong>Finish at</strong>}
+                    suffix={<kbd>06:00 PM</kbd>}
+                  />
+                </Col>
+                <Col>
+                  <Input
+                    readOnly={true}
+                    prefix={<strong>Remaining time</strong>}
+                    suffix={<kbd>06:00 PM</kbd>}
+                  />
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+          <hr className="mt-1 mb-1 hr_dashed" />
+          <Card bg="white" className="mt-1">
+            <Card.Header className="bg-white pt-1 pb-1">
+              <Progress
+                className="m-0"
+                percent={100}
+                size="small"
+                status="active"
+              />
+            </Card.Header>
+            <Card.Body className="p-1">
+              <Row>
+                <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+                  <Input
+                    readOnly={true}
+                    prefix={<strong>Remaining time</strong>}
+                    suffix={<kbd>06:00 PM</kbd>}
+                  />
+                </Col>
+                <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+                  <Input
+                    readOnly={true}
+                    prefix={<strong>Total work time</strong>}
+                    suffix={<kbd>06:00 PM</kbd>}
+                  />
+                </Col>
+                <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+                  <Input
+                    className="mt-1"
+                    readOnly={true}
+                    prefix={<strong>Total access time</strong>}
+                    suffix={<kbd>06:00 PM</kbd>}
+                  />
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
           <hr className="mt-1 mb-1 hr_dashed" />
         </Container>
       </div>
