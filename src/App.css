@@ -7,11 +7,10 @@ body {
     max-width: 500px;
     min-width: 500px;
     width: 500px;
-    max-height: 500px;
-    min-height: 500px;
-    height: 500px;
 }
 
-.hr_dashed{
-    border: 1px dashed black
+.ant-divider-horizontal.ant-divider-with-text-center::before,
+.ant-divider-horizontal.ant-divider-with-text-center::after
+{
+   border-top: 1px solid black;
 }
