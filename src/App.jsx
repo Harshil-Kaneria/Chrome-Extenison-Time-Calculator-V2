@@ -4,6 +4,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { TimePicker, Progress, Input, Divider, Checkbox } from "antd";
 import { Row, Col, Container, Card } from "react-bootstrap";
 import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration'
+dayjs.extend(duration)
 
 const App = () => {
   let getCurrentTime = () => dayjs().format("hh:mm:ss A | D MMM YYYY | dddd");
@@ -35,10 +37,6 @@ const App = () => {
     });
   };
 
-  useEffect(()=>{
-    console.log("🚀 ~ file: App.jsx:29 ~ App ~ timeData:", timeData)
-  },[timeData])
-
   let percent = 76;
 
   const startCalculate = () => {
@@ -46,11 +44,15 @@ const App = () => {
       const totalHours = timeData.break_time.get('hour') + timeData.working_time.get('hour')
       const totalBreaks = timeData.break_time.get('minute') + timeData.working_time.get('minute')
       let finalTime = timeData.start_time.add(totalHours,'hour').add(totalBreaks,'minute')
-      setDisplayTimeData({
-        ...displayTimeData,
-        finish_at:finalTime.format('hh:mm A')
-      })
-      console.log("🚀 ~ file: App.jsx:39 ~ startCalculate ~ finalTime:", finalTime)
+
+      setInterval(()=>{
+        setDisplayTimeData({
+          ...displayTimeData,
+          finish_at:finalTime.format('hh:mm A'),
+          remaining_time:dayjs.duration(finalTime.diff(dayjs())).format("HH:mm:ss")
+        })
+      },1000)
+
     } catch (error) {
       console.log("🚀 ~ file: App.jsx:40 ~ startCalculate ~ error:", error)
     }
@@ -168,14 +170,14 @@ const App = () => {
                   <Input
                     readOnly={true}
                     prefix={<strong>Finish at</strong>}
-                    suffix={displayTimeData!=null && (<kbd>{displayTimeData.finish_at}</kbd>)}
+                    suffix={displayTimeData.finish_at!=null?(<kbd>{displayTimeData.finish_at}</kbd>):(<kbd>-</kbd>)}
                   />
                 </Col>
                 <Col>
                   <Input
                     readOnly={true}
                     prefix={<strong>Remaining time</strong>}
-                    suffix={<kbd>06:00 PM</kbd>}
+                    suffix={displayTimeData.remaining_time!=null?(<kbd>{displayTimeData.remaining_time}</kbd>):(<kbd>-</kbd>)}
                   />
                 </Col>
               </Row>
@@ -215,14 +217,14 @@ const App = () => {
                   <Input
                     readOnly={true}
                     prefix={<strong>Remaining time</strong>}
-                    suffix={<kbd>06:00 PM</kbd>}
+                    suffix={displayTimeData.leave_remaining_time!=null?(<kbd>{displayTimeData.leave_remaining_time}</kbd>):(<kbd>-</kbd>)}
                   />
                 </Col>
                 <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
                   <Input
                     readOnly={true}
                     prefix={<strong>Total work time</strong>}
-                    suffix={<kbd>06:00 PM</kbd>}
+                    suffix={displayTimeData.leave_total_work_time!=null?(<kbd>{displayTimeData.leave_total_work_time}</kbd>):(<kbd>-</kbd>)}
                   />
                 </Col>
                 <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
@@ -230,7 +232,7 @@ const App = () => {
                     className="mt-1"
                     readOnly={true}
                     prefix={<strong>Total access time</strong>}
-                    suffix={<kbd>06:00 PM</kbd>}
+                    suffix={displayTimeData.leave_total_access_time!=null?(<kbd>{displayTimeData.leave_total_access_time}</kbd>):(<kbd>-</kbd>)}
                   />
                 </Col>
               </Row>
