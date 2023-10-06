@@ -10,6 +10,7 @@ dayjs.extend(duration)
 const App = () => {
   let getCurrentTime = () => dayjs().format("hh:mm:ss A | D MMM YYYY | dddd");
 
+  const [displayTimeInterval,setDisplayTimeInterval] = useState(null)
   const [timeData, setTimeData] = useState({
     start_time:dayjs('09:00', 'HH:mm'),
     working_time:dayjs('08:30', 'HH:mm'),
@@ -41,17 +42,22 @@ const App = () => {
 
   const startCalculate = () => {
     try {
-      const totalHours = timeData.break_time.get('hour') + timeData.working_time.get('hour')
+      const totalHours = timeData.break_time.get('hour')+timeData.working_time.get('hour')
       const totalBreaks = timeData.break_time.get('minute') + timeData.working_time.get('minute')
       let finalTime = timeData.start_time.add(totalHours,'hour').add(totalBreaks,'minute')
 
-      setInterval(()=>{
+      if(displayTimeInterval!=null){
+        clearInterval(displayTimeInterval)
+      }
+      
+      let displayTimeIntervalTemp = setInterval(()=>{  
         setDisplayTimeData({
           ...displayTimeData,
           finish_at:finalTime.format('hh:mm A'),
           remaining_time:dayjs.duration(finalTime.diff(dayjs())).format("HH:mm:ss")
         })
       },1000)
+      setDisplayTimeInterval(displayTimeIntervalTemp)
 
     } catch (error) {
       console.log("🚀 ~ file: App.jsx:40 ~ startCalculate ~ error:", error)
@@ -68,7 +74,7 @@ const App = () => {
         <Container>
           <Row>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-1">
+              <div class="text-end mt-1">
                 <kbd>Start time</kbd>
               </div>
               <TimePicker
@@ -85,7 +91,7 @@ const App = () => {
               />
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-1">
+              <div class="text-end mt-1">
                 <kbd>Working time</kbd>
               </div>
               <TimePicker
@@ -102,7 +108,7 @@ const App = () => {
               />
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-1">
+              <div class="text-end mt-1">
                 <kbd>Break time</kbd>
               </div>
               <TimePicker
@@ -119,7 +125,7 @@ const App = () => {
               />
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-1">
+              <div class="text-end mt-1">
                 <kbd>Leave time (optional)</kbd>
               </div>
               <TimePicker

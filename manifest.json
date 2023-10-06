@@ -1,6 +1,9 @@
 {
     "name": "Time Calculator V2",
 	"description": "A simple time calculator for estimation of time",
+    "icons":{
+        "128":"icon.png"
+    },
     "version": "1.0.0",
     "manifest_version": 3,
     "action": {
