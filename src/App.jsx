@@ -3,70 +3,135 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { TimePicker, Progress, Input, Divider, Checkbox } from "antd";
 import { Row, Col, Container, Card } from "react-bootstrap";
-import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration'
-dayjs.extend(duration)
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+dayjs.extend(duration);
 
 const App = () => {
   let getCurrentTime = () => dayjs().format("hh:mm:ss A | D MMM YYYY | dddd");
 
-  const [displayTimeInterval,setDisplayTimeInterval] = useState(null)
-  const [timeData, setTimeData] = useState({
-    start_time:dayjs('09:00', 'HH:mm'),
-    working_time:dayjs('08:30', 'HH:mm'),
-    break_time:dayjs('00:30', 'HH:mm'),
-    leave_time:null,
-  });
+  const [displayTimeInterval, setDisplayTimeInterval] = useState(null);
 
-  const [displayTimeData,setDisplayTimeData] = useState({
-    finish_at:null,
-    remaining_time:null,
-    leave_remaining_time:null,
-    leave_total_work_time:null,
-    leave_total_access_time:null,
-  })
-  
+  let initTimeData = {
+    start_time: dayjs("09:00", "HH:mm"),
+    working_time: dayjs("08:30", "HH:mm"),
+    break_time: dayjs("00:30", "HH:mm"),
+    leave_time: null,
+  };
+  const [timeData, setTimeData] = useState(initTimeData);
+
+  let initDisplayTimeData = {
+    finish_at: null,
+    remaining_time: null,
+    remaining_percentage: 0,
+    leave_remaining_time: null,
+    leave_total_work_time: null,
+    leave_total_access_time: null,
+    leave_remaining_percentage: 0,
+  };
+  const [displayTimeData, setDisplayTimeData] = useState(initDisplayTimeData);
+
   const [currenTime, setCurrentTime] = useState(getCurrentTime());
   useEffect(() => {
-    setInterval(() => setCurrentTime(getCurrentTime()), 1000)
-  },[]);
+    setInterval(() => setCurrentTime(getCurrentTime()), 1000);
+  }, []);
 
-  const handleChangeTimeData = (time,key) => {
+  const handleChangeTimeData = (time, key) => {
     setTimeData({
       ...timeData,
       [key]: time,
     });
   };
 
-  let percent = 76;
+  const stopCalculate = () => {
+    if (displayTimeInterval != null) {
+      clearInterval(displayTimeInterval);
+    }
+    setDisplayTimeInterval(null);
+    setTimeData(initTimeData);
+    setDisplayTimeData(initDisplayTimeData);
+  };
 
   const startCalculate = () => {
     try {
-      const totalHours = timeData.break_time.get('hour')+timeData.working_time.get('hour')
-      const totalBreaks = timeData.break_time.get('minute') + timeData.working_time.get('minute')
-      let finalTime = timeData.start_time.add(totalHours,'hour').add(totalBreaks,'minute')
+      const totalHours =
+        timeData.break_time.get("hour") + timeData.working_time.get("hour");
+      const totalBreaks =
+        timeData.break_time.get("minute") + timeData.working_time.get("minute");
+      let finalTime = timeData.start_time
+        .add(totalHours, "hour")
+        .add(totalBreaks, "minute");
 
-      if(displayTimeInterval!=null){
-        clearInterval(displayTimeInterval)
+      if (displayTimeInterval != null) {
+        clearInterval(displayTimeInterval);
       }
-      
-      let displayTimeIntervalTemp = setInterval(()=>{  
-        setDisplayTimeData({
-          ...displayTimeData,
-          finish_at:finalTime.format('hh:mm A'),
-          remaining_time:dayjs.duration(finalTime.diff(dayjs())).format("HH:mm:ss")
-        })
-      },1000)
-      setDisplayTimeInterval(displayTimeIntervalTemp)
 
+      let displayTimeIntervalTemp = setInterval(() => {
+        const currentTime = dayjs();
+        const percentage = (
+          ((currentTime - dayjs(timeData.start_time)) /
+            (finalTime - dayjs(timeData.start_time))) *
+          100
+        ).toFixed(2);
+
+        const updatedDisplayTimeData = {
+          finish_at: finalTime.format("hh:mm A"),
+          remaining_time: dayjs
+            .duration(finalTime.diff(currentTime))
+            .format("HH:mm:ss"),
+          remaining_percentage: percentage,
+        };
+
+        if (timeData.leave_time) {
+          const leaveTotalWorkDuration = dayjs
+            .duration(
+              dayjs(timeData.leave_time).diff(dayjs(timeData.start_time))
+            )
+            .subtract(timeData.break_time.get("hour"), "hour")
+            .subtract(timeData.break_time.get("minute"), "minute");
+          const leaveTotalWorkHours = leaveTotalWorkDuration.hours();
+          const leaveTotalWorkMinutes = leaveTotalWorkDuration.minutes();
+          updatedDisplayTimeData.leave_total_work_time = `${leaveTotalWorkHours}:${leaveTotalWorkMinutes}`;
+
+          const accessTimeDuration = leaveTotalWorkDuration.subtract({
+            hours: timeData.working_time.get("hour"),
+            minutes: timeData.working_time.get("minute"),
+          });
+          const leaveTotalAccessHours = accessTimeDuration.hours();
+          const leaveTotalAccessMinutes = accessTimeDuration.minutes();
+          updatedDisplayTimeData.leave_total_access_time = `${leaveTotalAccessHours}:${leaveTotalAccessMinutes}`;
+
+          const leaveRemainingTime = dayjs
+            .duration(dayjs(timeData.leave_time).diff(currentTime))
+            .format("HH:mm:ss");
+          updatedDisplayTimeData.leave_remaining_time = leaveRemainingTime;
+
+          const leaveRemainingPercentage = (
+            ((currentTime - dayjs(timeData.start_time)) /
+              (dayjs(timeData.leave_time) - dayjs(timeData.start_time))) *
+            100
+          ).toFixed(2);
+          updatedDisplayTimeData.leave_remaining_percentage =
+            leaveRemainingPercentage;
+        } else {
+          updatedDisplayTimeData.leave_remaining_time = null;
+          updatedDisplayTimeData.leave_total_work_time = null;
+          updatedDisplayTimeData.leave_total_access_time = null;
+          updatedDisplayTimeData.leave_remaining_percentage = 0;
+        }
+
+        setDisplayTimeData((prevDisplayTimeData) => ({
+          ...prevDisplayTimeData,
+          ...updatedDisplayTimeData,
+        }));
+      }, 1000);
+      setDisplayTimeInterval(displayTimeIntervalTemp);
     } catch (error) {
-      console.log("🚀 ~ file: App.jsx:40 ~ startCalculate ~ error:", error)
+      stopCalculate()
     }
-  }
+  };
 
-  const stopCalculate = () => {
-    
-  }
+  
 
   return (
     <>
@@ -74,7 +139,7 @@ const App = () => {
         <Container>
           <Row>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-end mt-1">
+              <div class="text-center mt-1">
                 <kbd>Start time</kbd>
               </div>
               <TimePicker
@@ -82,16 +147,14 @@ const App = () => {
                 size="large"
                 use12Hours
                 format="h:mm a"
-                onChange={(time) =>
-                  handleChangeTimeData(time,"start_time")
-                }
+                onChange={(time) => handleChangeTimeData(time, "start_time")}
                 changeOnBlur={true}
                 defaultValue={timeData.start_time}
                 value={timeData.start_time}
               />
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-end mt-1">
+              <div class="text-center mt-1">
                 <kbd>Working time</kbd>
               </div>
               <TimePicker
@@ -99,16 +162,14 @@ const App = () => {
                 size="large"
                 format="HH:mm"
                 showNow={false}
-                onChange={(time) =>
-                  handleChangeTimeData(time,"working_time")
-                }
+                onChange={(time) => handleChangeTimeData(time, "working_time")}
                 changeOnBlur={true}
                 defaultValue={timeData.working_time}
                 value={timeData.working_time}
               />
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-end mt-1">
+              <div class="text-center mt-1">
                 <kbd>Break time</kbd>
               </div>
               <TimePicker
@@ -116,16 +177,14 @@ const App = () => {
                 size="large"
                 format="HH:mm"
                 showNow={false}
-                onChange={(time) =>
-                  handleChangeTimeData(time,"break_time")
-                }
+                onChange={(time) => handleChangeTimeData(time, "break_time")}
                 changeOnBlur={true}
                 defaultValue={timeData.break_time}
                 value={timeData.break_time}
               />
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-end mt-1">
+              <div class="text-center mt-1">
                 <kbd>Leave time (optional)</kbd>
               </div>
               <TimePicker
@@ -133,9 +192,7 @@ const App = () => {
                 size="large"
                 use12Hours
                 format="h:mm a"
-                onChange={(time) =>
-                  handleChangeTimeData(time,"leave_time")
-                }
+                onChange={(time) => handleChangeTimeData(time, "leave_time")}
                 changeOnBlur={true}
                 defaultValue={timeData.leave_time}
                 value={timeData.leave_time}
@@ -158,13 +215,14 @@ const App = () => {
             <Card.Header className="bg-white pt-1 pb-1">
               <Progress
                 className="m-0"
-                percent={percent}
+                percent={displayTimeData.remaining_percentage}
                 size="small"
                 status="active"
                 strokeColor={
-                  percent >= 75
+                  displayTimeData.remaining_percentage >= 75
                     ? "green"
-                    : percent >= 36 && percent < 75
+                    : displayTimeData.remaining_percentage >= 36 &&
+                      displayTimeData.remaining_percentage < 75
                     ? "orange"
                     : "red"
                 }
@@ -176,14 +234,26 @@ const App = () => {
                   <Input
                     readOnly={true}
                     prefix={<strong>Finish at</strong>}
-                    suffix={displayTimeData.finish_at!=null?(<kbd>{displayTimeData.finish_at}</kbd>):(<kbd>-</kbd>)}
+                    suffix={
+                      displayTimeData.finish_at != null ? (
+                        <kbd>{displayTimeData.finish_at}</kbd>
+                      ) : (
+                        <kbd>-</kbd>
+                      )
+                    }
                   />
                 </Col>
                 <Col>
                   <Input
                     readOnly={true}
                     prefix={<strong>Remaining time</strong>}
-                    suffix={displayTimeData.remaining_time!=null?(<kbd>{displayTimeData.remaining_time}</kbd>):(<kbd>-</kbd>)}
+                    suffix={
+                      displayTimeData.remaining_time != null ? (
+                        <kbd>{displayTimeData.remaining_time}</kbd>
+                      ) : (
+                        <kbd>-</kbd>
+                      )
+                    }
                   />
                 </Col>
               </Row>
@@ -205,13 +275,14 @@ const App = () => {
             <Card.Header className="bg-white pt-1 pb-1">
               <Progress
                 className="m-0"
-                percent={percent}
+                percent={displayTimeData.leave_remaining_percentage}
                 size="small"
                 status="active"
                 strokeColor={
-                  percent >= 75
+                  displayTimeData.leave_remaining_percentage >= 75
                     ? "green"
-                    : percent >= 36 && percent < 75
+                    : displayTimeData.leave_remaining_percentage >= 36 &&
+                      displayTimeData.leave_remaining_percentage < 75
                     ? "orange"
                     : "red"
                 }
@@ -223,22 +294,31 @@ const App = () => {
                   <Input
                     readOnly={true}
                     prefix={<strong>Remaining time</strong>}
-                    suffix={displayTimeData.leave_remaining_time!=null?(<kbd>{displayTimeData.leave_remaining_time}</kbd>):(<kbd>-</kbd>)}
+                    suffix={
+                      displayTimeData.leave_remaining_time != null ? (
+                        <kbd>{displayTimeData.leave_remaining_time}</kbd>
+                      ) : (
+                        <kbd>-</kbd>
+                      )
+                    }
                   />
                 </Col>
                 <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
                   <Input
                     readOnly={true}
                     prefix={<strong>Total work time</strong>}
-                    suffix={displayTimeData.leave_total_work_time!=null?(<kbd>{displayTimeData.leave_total_work_time}</kbd>):(<kbd>-</kbd>)}
-                  />
-                </Col>
-                <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-                  <Input
-                    className="mt-1"
-                    readOnly={true}
-                    prefix={<strong>Total access time</strong>}
-                    suffix={displayTimeData.leave_total_access_time!=null?(<kbd>{displayTimeData.leave_total_access_time}</kbd>):(<kbd>-</kbd>)}
+                    suffix={
+                      displayTimeData.leave_total_work_time != null &&
+                      displayTimeData.leave_total_access_time != null ? (
+                        <kbd>
+                          {displayTimeData.leave_total_work_time +
+                            "|" +
+                            displayTimeData.leave_total_access_time}
+                        </kbd>
+                      ) : (
+                        <kbd>-</kbd>
+                      )
+                    }
                   />
                 </Col>
               </Row>
@@ -249,17 +329,25 @@ const App = () => {
           </Divider>
           <Row className="pb-2">
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <button type="button" class="btn btn-sm btn-outline-dark" onClick={startCalculate}>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-dark"
+                onClick={startCalculate}
+              >
                 Calculate
               </button>
               {"\u00A0"}
               {"\u00A0"}
               {"\u00A0"}
-              <button type="button" class="btn btn-sm btn-outline-danger" onClick={stopCalculate}>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                onClick={stopCalculate}
+              >
                 Reset
               </button>
             </Col>
-            <Col
+            {/* <Col
               xxl={6}
               xl={6}
               lg={6}
@@ -269,7 +357,7 @@ const App = () => {
               className="d-flex align-items-center justify-content-end"
             >
               <Checkbox>Notified me</Checkbox>
-            </Col>
+            </Col> */}
           </Row>
         </Container>
       </div>
