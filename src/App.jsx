@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { TimePicker, Progress, Input, Divider, Checkbox } from "antd";
@@ -10,6 +10,7 @@ dayjs.extend(duration);
 const App = () => {
   let getCurrentTime = () => dayjs().format("hh:mm:ss A | D MMM YYYY | dddd");
 
+  const buttonCalc= useRef(null);
   const [displayTimeInterval, setDisplayTimeInterval] = useState(null);
 
   let initTimeData = {
@@ -17,6 +18,7 @@ const App = () => {
     working_time: dayjs("08:30", "HH:mm"),
     break_time: dayjs("00:30", "HH:mm"),
     leave_time: null,
+    is_calculation_started: false,
   };
   const [timeData, setTimeData] = useState(initTimeData);
 
@@ -50,39 +52,48 @@ const App = () => {
     setDisplayTimeInterval(null);
     setTimeData(initTimeData);
     setDisplayTimeData(initDisplayTimeData);
+    chrome.storage.sync.set({ time_calc_data: null });
   };
 
-  const startCalculate = () => {
+  const startCalculate = (isInit) => {
     try {
-      const totalHours =
-        timeData.break_time.get("hour") + timeData.working_time.get("hour");
-      const totalBreaks =
-        timeData.break_time.get("minute") + timeData.working_time.get("minute");
-      let finalTime = timeData.start_time
-        .add(totalHours, "hour")
-        .add(totalBreaks, "minute");
 
-      if (displayTimeInterval != null) {
-        clearInterval(displayTimeInterval);
+      if (isInit!=true) {
+        let tempData = timeData
+        tempData.is_calculation_started = true
+        chrome.storage.sync.set({ time_calc_data:tempData });
       }
 
-      let displayTimeIntervalTemp = setInterval(() => {
-        const currentTime = dayjs();
-        const percentage = (
-          ((currentTime - dayjs(timeData.start_time)) /
+      const totalHours =
+        timeData.break_time.get("hour") + timeData.working_time.get("hour");
+        const totalBreaks =
+        timeData.break_time.get("minute") + timeData.working_time.get("minute");
+        let finalTime = timeData.start_time
+        .add(totalHours, "hour")
+        .add(totalBreaks, "minute");
+        
+        if (displayTimeInterval != null) {
+          clearInterval(displayTimeInterval);
+        }
+        
+        let displayTimeIntervalTemp = setInterval(() => {
+          const currentTime = dayjs();
+          const percentage = (
+            ((currentTime - dayjs(timeData.start_time)) /
             (finalTime - dayjs(timeData.start_time))) *
-          100
-        ).toFixed(2);
-
+            100
+            ).toFixed(2);
+            
         const updatedDisplayTimeData = {
           finish_at: finalTime.format("hh:mm A"),
           remaining_time: dayjs
             .duration(finalTime.diff(currentTime))
             .format("HH:mm:ss"),
           remaining_percentage: percentage,
+          is_calculation_started: true,
         };
 
-        if (timeData.leave_time) {
+        if (timeData.leave_time!=null) {
           const leaveTotalWorkDuration = dayjs
             .duration(
               dayjs(timeData.leave_time).diff(dayjs(timeData.start_time))
@@ -127,11 +138,38 @@ const App = () => {
       }, 1000);
       setDisplayTimeInterval(displayTimeIntervalTemp);
     } catch (error) {
-      stopCalculate()
+      stopCalculate();
     }
   };
 
-  
+  const getDataFromLocal = () => {
+    chrome.storage.sync.get(["time_calc_data"]).then((result) => {
+      if (
+        result != undefined &&
+        result != null &&
+        result.time_calc_data != undefined &&
+        result.time_calc_data != null &&
+        result.time_calc_data.is_calculation_started == true
+      ) {
+        let tempData = result.time_calc_data
+        let saveTimeData = {
+          start_time: dayjs(`${tempData.start_time.$H+':'+tempData.start_time.$m}`,"HH:mm"),
+          working_time: dayjs(`${tempData.working_time.$H+':'+tempData.working_time.$m}`,"HH:mm"),
+          break_time: dayjs(`${tempData.break_time.$H+':'+tempData.break_time.$m}`,"HH:mm"),
+          leave_time:tempData.leave_time==null?null:dayjs(`${tempData.leave_time.$H+':'+tempData.leave_time.$m}`,"HH:mm"),
+          is_calculation_started: tempData.is_calculation_started,
+        };
+        setTimeData(saveTimeData);
+        setTimeout(() => {
+          buttonCalc.current.click()
+        }, 1000);
+      }
+    });
+  };
+
+  useEffect(() => {
+    getDataFromLocal();
+  }, []);
 
   return (
     <>
@@ -290,20 +328,7 @@ const App = () => {
             </Card.Header>
             <Card.Body className="p-1">
               <Row>
-                <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-                  <Input
-                    readOnly={true}
-                    prefix={<strong>Remaining time</strong>}
-                    suffix={
-                      displayTimeData.leave_remaining_time != null ? (
-                        <kbd>{displayTimeData.leave_remaining_time}</kbd>
-                      ) : (
-                        <kbd>-</kbd>
-                      )
-                    }
-                  />
-                </Col>
-                <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+              <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
                   <Input
                     readOnly={true}
                     prefix={<strong>Total work time</strong>}
@@ -315,6 +340,19 @@ const App = () => {
                             "|" +
                             displayTimeData.leave_total_access_time}
                         </kbd>
+                      ) : (
+                        <kbd>-</kbd>
+                      )
+                    }
+                  />
+                </Col>
+                <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+                  <Input
+                    readOnly={true}
+                    prefix={<strong>Remaining time</strong>}
+                    suffix={
+                      displayTimeData.leave_remaining_time != null ? (
+                        <kbd>{displayTimeData.leave_remaining_time}</kbd>
                       ) : (
                         <kbd>-</kbd>
                       )
@@ -333,6 +371,7 @@ const App = () => {
                 type="button"
                 class="btn btn-sm btn-outline-dark"
                 onClick={startCalculate}
+                ref={buttonCalc}
               >
                 Calculate
               </button>
