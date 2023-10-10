@@ -173,12 +173,12 @@ const App = () => {
 
   return (
     <>
-      <div className="main_body bg-light">
+      <div className="main_body">
         <Container>
           <Row>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
               <div class="text-center mt-1">
-                <kbd>Start time</kbd>
+                <strong>Start time</strong>
               </div>
               <TimePicker
                 className="w-100"
@@ -193,7 +193,7 @@ const App = () => {
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
               <div class="text-center mt-1">
-                <kbd>Working time</kbd>
+                <strong>Working time</strong>
               </div>
               <TimePicker
                 className="w-100"
@@ -208,7 +208,7 @@ const App = () => {
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
               <div class="text-center mt-1">
-                <kbd>Break time</kbd>
+                <strong>Break time</strong>
               </div>
               <TimePicker
                 className="w-100"
@@ -223,7 +223,7 @@ const App = () => {
             </Col>
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
               <div class="text-center mt-1">
-                <kbd>Leave time (optional)</kbd>
+                <strong>Leave time (optional)</strong>
               </div>
               <TimePicker
                 className="w-100"
@@ -274,9 +274,9 @@ const App = () => {
                     prefix={<strong>Finish at</strong>}
                     suffix={
                       displayTimeData.finish_at != null ? (
-                        <kbd>{displayTimeData.finish_at}</kbd>
+                        <strong>{displayTimeData.finish_at}</strong>
                       ) : (
-                        <kbd>-</kbd>
+                        <strong>-</strong>
                       )
                     }
                   />
@@ -287,9 +287,9 @@ const App = () => {
                     prefix={<strong>Remaining time</strong>}
                     suffix={
                       displayTimeData.remaining_time != null ? (
-                        <kbd>{displayTimeData.remaining_time}</kbd>
+                        <strong>{displayTimeData.remaining_time}</strong>
                       ) : (
-                        <kbd>-</kbd>
+                        <strong>-</strong>
                       )
                     }
                   />
@@ -335,13 +335,13 @@ const App = () => {
                     suffix={
                       displayTimeData.leave_total_work_time != null &&
                       displayTimeData.leave_total_access_time != null ? (
-                        <kbd>
+                        <strong>
                           {displayTimeData.leave_total_work_time +
-                            "|" +
+                            " | " +
                             displayTimeData.leave_total_access_time}
-                        </kbd>
+                        </strong>
                       ) : (
-                        <kbd>-</kbd>
+                        <strong>-</strong>
                       )
                     }
                   />
@@ -352,9 +352,9 @@ const App = () => {
                     prefix={<strong>Remaining time</strong>}
                     suffix={
                       displayTimeData.leave_remaining_time != null ? (
-                        <kbd>{displayTimeData.leave_remaining_time}</kbd>
+                        <strong>{displayTimeData.leave_remaining_time}</strong>
                       ) : (
-                        <kbd>-</kbd>
+                        <strong>-</strong>
                       )
                     }
                   />
