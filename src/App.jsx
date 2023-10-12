@@ -173,15 +173,12 @@ const App = () => {
 
   return (
     <>
-      <div className="main_body">
+      <div className="main_body p-3">
         <Container>
           <Row>
-            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-1">
-                <strong>Start time</strong>
-              </div>
+            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6} className="text-center">
+              <p className="mb-0"><>Start time *</></p>
               <TimePicker
-                className="w-100"
                 size="large"
                 use12Hours
                 format="h:mm a"
@@ -191,12 +188,9 @@ const App = () => {
                 value={timeData.start_time}
               />
             </Col>
-            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-1">
-                <strong>Working time</strong>
-              </div>
+            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6} className="text-center">
+              <p className="mb-0"><>Working time *</></p>
               <TimePicker
-                className="w-100"
                 size="large"
                 format="HH:mm"
                 showNow={false}
@@ -206,12 +200,9 @@ const App = () => {
                 value={timeData.working_time}
               />
             </Col>
-            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-1">
-                <strong>Break time</strong>
-              </div>
+            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6} className="text-center mt-3">
+              <p className="mb-0"><>Break time *</></p>
               <TimePicker
-                className="w-100"
                 size="large"
                 format="HH:mm"
                 showNow={false}
@@ -221,12 +212,9 @@ const App = () => {
                 value={timeData.break_time}
               />
             </Col>
-            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-              <div class="text-center mt-1">
-                <strong>Leave time (optional)</strong>
-              </div>
+            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6} className="text-center mt-3">
+              <p className="mb-0"><>Leave time</></p>
               <TimePicker
-                className="w-100"
                 size="large"
                 use12Hours
                 format="h:mm a"
@@ -237,19 +225,7 @@ const App = () => {
               />
             </Col>
           </Row>
-          <Divider className="mt-1 mb-1" dashed={true}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              class="bi bi-hourglass-top"
-              viewBox="0 0 16 16"
-            >
-              <path d="M2 14.5a.5.5 0 0 0 .5.5h11a.5.5 0 1 0 0-1h-1v-1a4.5 4.5 0 0 0-2.557-4.06c-.29-.139-.443-.377-.443-.59v-.7c0-.213.154-.451.443-.59A4.5 4.5 0 0 0 12.5 3V2h1a.5.5 0 0 0 0-1h-11a.5.5 0 0 0 0 1h1v1a4.5 4.5 0 0 0 2.557 4.06c.29.139.443.377.443.59v.7c0 .213-.154.451-.443.59A4.5 4.5 0 0 0 3.5 13v1h-1a.5.5 0 0 0-.5.5zm2.5-.5v-1a3.5 3.5 0 0 1 1.989-3.158c.533-.256 1.011-.79 1.011-1.491v-.702s.18.101.5.101.5-.1.5-.1v.7c0 .701.478 1.236 1.011 1.492A3.5 3.5 0 0 1 11.5 13v1h-7z" />
-            </svg>
-          </Divider>
-          <Card bg="white" className="mt-1">
+          <Card bg="white" className="mt-3">
             <Card.Header className="bg-white pt-1 pb-1">
               <Progress
                 className="m-0"
@@ -266,7 +242,7 @@ const App = () => {
                 }
               />
             </Card.Header>
-            <Card.Body className="p-1">
+            <Card.Body>
               <Row>
                 <Col>
                   <Input
@@ -297,19 +273,7 @@ const App = () => {
               </Row>
             </Card.Body>
           </Card>
-          <Divider className="mt-1 mb-1" dashed={true}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              class="bi bi-hourglass-bottom"
-              viewBox="0 0 16 16"
-            >
-              <path d="M2 1.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1-.5-.5zm2.5.5v1a3.5 3.5 0 0 0 1.989 3.158c.533.256 1.011.791 1.011 1.491v.702s.18.149.5.149.5-.15.5-.15v-.7c0-.701.478-1.236 1.011-1.492A3.5 3.5 0 0 0 11.5 3V2h-7z" />
-            </svg>
-          </Divider>
-          <Card bg="white" className="mt-1">
+          <Card bg="white" className="mt-3">
             <Card.Header className="bg-white pt-1 pb-1">
               <Progress
                 className="m-0"
@@ -326,12 +290,12 @@ const App = () => {
                 }
               />
             </Card.Header>
-            <Card.Body className="p-1">
+            <Card.Body>
               <Row>
               <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
                   <Input
                     readOnly={true}
-                    prefix={<strong>Total work time</strong>}
+                    prefix={<strong>Working time</strong>}
                     suffix={
                       displayTimeData.leave_total_work_time != null &&
                       displayTimeData.leave_total_access_time != null ? (
@@ -362,7 +326,7 @@ const App = () => {
               </Row>
             </Card.Body>
           </Card>
-          <Divider className="mt-1 mb-1" dashed={true}>
+          <Divider className="mt-3 mb-3" dashed={true}>
             {currenTime}
           </Divider>
           <Row className="pb-2">
