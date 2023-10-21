@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { TimePicker, Progress, Input, Divider, Checkbox, Switch } from "antd";
-import { Row, Col, Container, Card, Alert } from "react-bootstrap";
+import { TimePicker, Progress, Input, Divider, Switch } from "antd";
+import { Row, Col, Container, Card } from "react-bootstrap";
+import { CirclePicker } from 'react-color'
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
@@ -16,8 +17,10 @@ const App = () => {
   let initUiModeData = {
     is_classic_mode: false,
     is_notification_on: false,
+    select_color : "#f5f4ff",
   };
   const [uiMode, setUiMode] = useState(initUiModeData);
+  const [allColors,setAllColors ] = useState(["#f5f4ff", "#f8bcc0", "#f6a9cc", "#c2a1d7", "#999ad4", "#89bbf6", "#73c9f9", "#6bd5e3", "#61b5c7", "#89cc98", "#b0d9a1", "#ffec68", "#ffc59e", "#ff8a78"])
 
   let initTimeData = {
     start_time: dayjs("09:00", "HH:mm"),
@@ -237,7 +240,7 @@ const App = () => {
 
   return (
     <>
-      <div className="main_body p-3">
+      <div className="main_body p-3" style={{backgroundColor:uiMode.select_color}}>
         <Container>
           <Row>
             <Col
@@ -566,6 +569,20 @@ const App = () => {
           <Divider className="mt-3 mb-3" dashed={true}>
             {currenTime}
           </Divider>
+
+          <Card className="mb-2">
+           <Row className="p-1 d-flex justify-content-center">
+            <CirclePicker 
+              width="auto"
+              circleSize={20}
+              circleSpacing={10}
+              colors={allColors}
+              color={uiMode.select_color}
+              onChangeComplete={(color)=>{setUiMode({...uiMode,select_color:color.hex})}}
+            />
+           </Row>
+          </Card>
+
           <Row className="pb-2">
             <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
               <button
