@@ -1,8 +1,8 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { TimePicker, Progress, Input, Divider, Checkbox } from "antd";
-import { Row, Col, Container, Card } from "react-bootstrap";
+import { TimePicker, Progress, Input, Divider, Checkbox, Switch } from "antd";
+import { Row, Col, Container, Card, Alert } from "react-bootstrap";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
@@ -10,8 +10,13 @@ dayjs.extend(duration);
 const App = () => {
   let getCurrentTime = () => dayjs().format("hh:mm:ss A | D MMM YYYY | dddd");
 
-  const buttonCalc= useRef(null);
+  const buttonCalc = useRef(null);
   const [displayTimeInterval, setDisplayTimeInterval] = useState(null);
+
+  let initUiModeData = {
+    is_classic_mode: false,
+  };
+  const [uiMode, setUiMode] = useState(initUiModeData);
 
   let initTimeData = {
     start_time: dayjs("09:00", "HH:mm"),
@@ -57,33 +62,32 @@ const App = () => {
 
   const startCalculate = (isInit) => {
     try {
-
-      if (isInit!=true) {
-        let tempData = timeData
-        tempData.is_calculation_started = true
-        chrome.storage.sync.set({ time_calc_data:tempData });
+      if (isInit != true) {
+        let tempData = timeData;
+        tempData.is_calculation_started = true;
+        chrome.storage.sync.set({ time_calc_data: tempData });
       }
 
       const totalHours =
         timeData.break_time.get("hour") + timeData.working_time.get("hour");
-        const totalBreaks =
+      const totalBreaks =
         timeData.break_time.get("minute") + timeData.working_time.get("minute");
-        let finalTime = timeData.start_time
+      let finalTime = timeData.start_time
         .add(totalHours, "hour")
         .add(totalBreaks, "minute");
-        
-        if (displayTimeInterval != null) {
-          clearInterval(displayTimeInterval);
-        }
-        
-        let displayTimeIntervalTemp = setInterval(() => {
-          const currentTime = dayjs();
-          const percentage = (
-            ((currentTime - dayjs(timeData.start_time)) /
+
+      if (displayTimeInterval != null) {
+        clearInterval(displayTimeInterval);
+      }
+
+      let displayTimeIntervalTemp = setInterval(() => {
+        const currentTime = dayjs();
+        const percentage = (
+          ((currentTime - dayjs(timeData.start_time)) /
             (finalTime - dayjs(timeData.start_time))) *
-            100
-            ).toFixed(2);
-            
+          100
+        ).toFixed(2);
+
         const updatedDisplayTimeData = {
           finish_at: finalTime.format("hh:mm A"),
           remaining_time: dayjs
@@ -93,7 +97,7 @@ const App = () => {
           is_calculation_started: true,
         };
 
-        if (timeData.leave_time!=null) {
+        if (timeData.leave_time != null) {
           const leaveTotalWorkDuration = dayjs
             .duration(
               dayjs(timeData.leave_time).diff(dayjs(timeData.start_time))
@@ -151,33 +155,82 @@ const App = () => {
         result.time_calc_data != null &&
         result.time_calc_data.is_calculation_started == true
       ) {
-        let tempData = result.time_calc_data
+        let tempData = result.time_calc_data;
         let saveTimeData = {
-          start_time: dayjs(`${tempData.start_time.$H+':'+tempData.start_time.$m}`,"HH:mm"),
-          working_time: dayjs(`${tempData.working_time.$H+':'+tempData.working_time.$m}`,"HH:mm"),
-          break_time: dayjs(`${tempData.break_time.$H+':'+tempData.break_time.$m}`,"HH:mm"),
-          leave_time:tempData.leave_time==null?null:dayjs(`${tempData.leave_time.$H+':'+tempData.leave_time.$m}`,"HH:mm"),
+          start_time: dayjs(
+            `${tempData.start_time.$H + ":" + tempData.start_time.$m}`,
+            "HH:mm"
+          ),
+          working_time: dayjs(
+            `${tempData.working_time.$H + ":" + tempData.working_time.$m}`,
+            "HH:mm"
+          ),
+          break_time: dayjs(
+            `${tempData.break_time.$H + ":" + tempData.break_time.$m}`,
+            "HH:mm"
+          ),
+          leave_time:
+            tempData.leave_time == null
+              ? null
+              : dayjs(
+                  `${tempData.leave_time.$H + ":" + tempData.leave_time.$m}`,
+                  "HH:mm"
+                ),
           is_calculation_started: tempData.is_calculation_started,
         };
         setTimeData(saveTimeData);
         setTimeout(() => {
-          buttonCalc.current.click()
+          buttonCalc.current.click();
         }, 1000);
+      }
+    });
+  };
+
+  const updateUiData = () => {
+    chrome.storage.sync.set({ uiData: uiMode });
+  };
+
+  const getUiDataFromLocal = () => {
+    chrome.storage.sync.get(["uiData"]).then((result) => {
+      if (
+        result != undefined &&
+        result != null &&
+        result.uiData != undefined &&
+        result.uiData != null
+      ) {
+        let tempData = result.uiData;
+        setUiMode(tempData);
       }
     });
   };
 
   useEffect(() => {
     getDataFromLocal();
+    getUiDataFromLocal();
   }, []);
+
+  useEffect(() => {
+    console.log("🚀 ~ file: App.jsx:215 ~ App ~ uiMode:", uiMode)
+    updateUiData();
+  }, [uiMode]);
 
   return (
     <>
       <div className="main_body p-3">
         <Container>
           <Row>
-            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6} className="text-center">
-              <p className="mb-0"><>Start time *</></p>
+            <Col
+              xxl={6}
+              xl={6}
+              lg={6}
+              md={6}
+              sm={6}
+              xs={6}
+              className="text-center"
+            >
+              <p className="mb-0">
+                <>Start time *</>
+              </p>
               <TimePicker
                 size="large"
                 use12Hours
@@ -188,8 +241,18 @@ const App = () => {
                 value={timeData.start_time}
               />
             </Col>
-            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6} className="text-center">
-              <p className="mb-0"><>Working time *</></p>
+            <Col
+              xxl={6}
+              xl={6}
+              lg={6}
+              md={6}
+              sm={6}
+              xs={6}
+              className="text-center"
+            >
+              <p className="mb-0">
+                <>Working time *</>
+              </p>
               <TimePicker
                 size="large"
                 format="HH:mm"
@@ -200,8 +263,18 @@ const App = () => {
                 value={timeData.working_time}
               />
             </Col>
-            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6} className="text-center mt-3">
-              <p className="mb-0"><>Break time *</></p>
+            <Col
+              xxl={6}
+              xl={6}
+              lg={6}
+              md={6}
+              sm={6}
+              xs={6}
+              className="text-center mt-3"
+            >
+              <p className="mb-0">
+                <>Break time *</>
+              </p>
               <TimePicker
                 size="large"
                 format="HH:mm"
@@ -212,8 +285,18 @@ const App = () => {
                 value={timeData.break_time}
               />
             </Col>
-            <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6} className="text-center mt-3">
-              <p className="mb-0"><>Leave time</></p>
+            <Col
+              xxl={6}
+              xl={6}
+              lg={6}
+              md={6}
+              sm={6}
+              xs={6}
+              className="text-center mt-3"
+            >
+              <p className="mb-0">
+                <>Leave time</>
+              </p>
               <TimePicker
                 size="large"
                 use12Hours
@@ -225,79 +308,83 @@ const App = () => {
               />
             </Col>
           </Row>
-          <Card bg="white" className="mt-3">
-            <Card.Header className="bg-white pt-1 pb-1">
-              <Progress
-                className="m-0"
-                percent={displayTimeData.remaining_percentage}
-                size="small"
-                status="active"
-                strokeColor={
-                  displayTimeData.remaining_percentage >= 75
-                    ? "green"
-                    : displayTimeData.remaining_percentage >= 36 &&
-                      displayTimeData.remaining_percentage < 75
-                    ? "orange"
-                    : "red"
-                }
-              />
-            </Card.Header>
-            <Card.Body>
-              <Row>
-                <Col>
-                  <Input
-                    readOnly={true}
-                    prefix={<strong>Finish at</strong>}
-                    suffix={
-                      displayTimeData.finish_at != null ? (
+
+          {uiMode.is_classic_mode ? (
+            <>
+              <Card bg="white" className="mt-2 rounded">
+                <Card.Body>
+                  <Row>
+                    <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+                      <strong>Finish at</strong>
+                    </Col>
+                    <Col
+                      xxl={6}
+                      xl={6}
+                      lg={6}
+                      md={6}
+                      sm={6}
+                      xs={6}
+                      className="text-end"
+                    >
+                      {displayTimeData.finish_at != null ? (
                         <strong>{displayTimeData.finish_at}</strong>
                       ) : (
                         <strong>-</strong>
-                      )
-                    }
-                  />
-                </Col>
-                <Col>
-                  <Input
-                    readOnly={true}
-                    prefix={<strong>Remaining time</strong>}
-                    suffix={
-                      displayTimeData.remaining_time != null ? (
+                      )}
+                    </Col>
+                    <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+                      <strong>Remaining time</strong>
+                    </Col>
+                    <Col
+                      xxl={6}
+                      xl={6}
+                      lg={6}
+                      md={6}
+                      sm={6}
+                      xs={6}
+                      className="text-end"
+                    >
+                      {displayTimeData.remaining_time != null ? (
                         <strong>{displayTimeData.remaining_time}</strong>
                       ) : (
                         <strong>-</strong>
-                      )
-                    }
-                  />
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
-          <Card bg="white" className="mt-3">
-            <Card.Header className="bg-white pt-1 pb-1">
-              <Progress
-                className="m-0"
-                percent={displayTimeData.leave_remaining_percentage}
-                size="small"
-                status="active"
-                strokeColor={
-                  displayTimeData.leave_remaining_percentage >= 75
-                    ? "green"
-                    : displayTimeData.leave_remaining_percentage >= 36 &&
-                      displayTimeData.leave_remaining_percentage < 75
-                    ? "orange"
-                    : "red"
-                }
-              />
-            </Card.Header>
-            <Card.Body>
-              <Row>
-              <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-                  <Input
-                    readOnly={true}
-                    prefix={<strong>Working time</strong>}
-                    suffix={
-                      displayTimeData.leave_total_work_time != null &&
+                      )}
+                    </Col>
+                    <Col xxl={12} xl={12} lg={12} md={12} sm={12} xs={12}>
+                      <Progress
+                        className="m-0"
+                        percent={displayTimeData.remaining_percentage}
+                        size="small"
+                        status="active"
+                        strokeColor={
+                          displayTimeData.remaining_percentage >= 75
+                            ? "green"
+                            : displayTimeData.remaining_percentage >= 36 &&
+                              displayTimeData.remaining_percentage < 75
+                            ? "orange"
+                            : "red"
+                        }
+                      />
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+              <Card bg="white" className="mt-2 mb-0 rounded">
+                <Card.Body>
+                  <Row>
+                    <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+                      <strong>Working time</strong>
+                    </Col>
+                    <Col
+                      xxl={6}
+                      xl={6}
+                      lg={6}
+                      md={6}
+                      sm={6}
+                      xs={6}
+                      className="text-end"
+                    >
+                      {displayTimeData.leave_total_work_time != null &&
                       displayTimeData.leave_total_access_time != null ? (
                         <strong>
                           {displayTimeData.leave_total_work_time +
@@ -306,26 +393,155 @@ const App = () => {
                         </strong>
                       ) : (
                         <strong>-</strong>
-                      )
-                    }
-                  />
-                </Col>
-                <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
-                  <Input
-                    readOnly={true}
-                    prefix={<strong>Remaining time</strong>}
-                    suffix={
-                      displayTimeData.leave_remaining_time != null ? (
+                      )}
+                    </Col>
+                    <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+                      <strong>Remaining time</strong>
+                    </Col>
+                    <Col
+                      xxl={6}
+                      xl={6}
+                      lg={6}
+                      md={6}
+                      sm={6}
+                      xs={6}
+                      className="text-end"
+                    >
+                      {displayTimeData.leave_remaining_time != null ? (
                         <strong>{displayTimeData.leave_remaining_time}</strong>
                       ) : (
                         <strong>-</strong>
-                      )
+                      )}
+                    </Col>
+                    <Col xxl={12} xl={12} lg={12} md={12} sm={12} xs={12}>
+                      <Progress
+                        className="m-0"
+                        percent={displayTimeData.leave_remaining_percentage}
+                        size="small"
+                        status="active"
+                        strokeColor={
+                          displayTimeData.leave_remaining_percentage >= 75
+                            ? "green"
+                            : displayTimeData.leave_remaining_percentage >=
+                                36 &&
+                              displayTimeData.leave_remaining_percentage < 75
+                            ? "orange"
+                            : "red"
+                        }
+                      />
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+            </>
+          ) : (
+            <>
+              <Card bg="white" className="mt-3">
+                <Card.Header className="bg-white pt-1 pb-1">
+                  <Progress
+                    className="m-0"
+                    percent={displayTimeData.remaining_percentage}
+                    size="small"
+                    status="active"
+                    strokeColor={
+                      displayTimeData.remaining_percentage >= 75
+                        ? "green"
+                        : displayTimeData.remaining_percentage >= 36 &&
+                          displayTimeData.remaining_percentage < 75
+                        ? "orange"
+                        : "red"
                     }
                   />
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
+                </Card.Header>
+                <Card.Body>
+                  <Row>
+                    <Col>
+                      <Input
+                        readOnly={true}
+                        prefix={<strong>Finish at</strong>}
+                        suffix={
+                          displayTimeData.finish_at != null ? (
+                            <strong>{displayTimeData.finish_at}</strong>
+                          ) : (
+                            <strong>-</strong>
+                          )
+                        }
+                      />
+                    </Col>
+                    <Col>
+                      <Input
+                        readOnly={true}
+                        prefix={<strong>Remaining time</strong>}
+                        suffix={
+                          displayTimeData.remaining_time != null ? (
+                            <strong>{displayTimeData.remaining_time}</strong>
+                          ) : (
+                            <strong>-</strong>
+                          )
+                        }
+                      />
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+              <Card bg="white" className="mt-3">
+                <Card.Header className="bg-white pt-1 pb-1">
+                  <Progress
+                    className="m-0"
+                    percent={displayTimeData.leave_remaining_percentage}
+                    size="small"
+                    status="active"
+                    strokeColor={
+                      displayTimeData.leave_remaining_percentage >= 75
+                        ? "green"
+                        : displayTimeData.leave_remaining_percentage >= 36 &&
+                          displayTimeData.leave_remaining_percentage < 75
+                        ? "orange"
+                        : "red"
+                    }
+                  />
+                </Card.Header>
+                <Card.Body>
+                  <Row>
+                    <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+                      <Input
+                        readOnly={true}
+                        prefix={<strong>Working time</strong>}
+                        suffix={
+                          displayTimeData.leave_total_work_time != null &&
+                          displayTimeData.leave_total_access_time != null ? (
+                            <strong>
+                              {displayTimeData.leave_total_work_time +
+                                " | " +
+                                displayTimeData.leave_total_access_time}
+                            </strong>
+                          ) : (
+                            <strong>-</strong>
+                          )
+                        }
+                      />
+                    </Col>
+                    <Col xxl={6} xl={6} lg={6} md={6} sm={6} xs={6}>
+                      <Input
+                        readOnly={true}
+                        prefix={<strong>Remaining time</strong>}
+                        suffix={
+                          displayTimeData.leave_remaining_time != null ? (
+                            <strong>
+                              {displayTimeData.leave_remaining_time}
+                            </strong>
+                          ) : (
+                            <strong>-</strong>
+                          )
+                        }
+                      />
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+            </>
+          )}
+
           <Divider className="mt-3 mb-3" dashed={true}>
             {currenTime}
           </Divider>
@@ -350,17 +566,28 @@ const App = () => {
                 Reset
               </button>
             </Col>
-            {/* <Col
+            <Col
               xxl={6}
               xl={6}
               lg={6}
               md={6}
               sm={6}
               xs={6}
-              className="d-flex align-items-center justify-content-end"
+              className="d-flex align-items-center"
             >
-              <Checkbox>Notified me</Checkbox>
-            </Col> */}
+              {/* <Checkbox>Notified me</Checkbox> */}
+              <Switch
+                checkedChildren="Fury mode"
+                unCheckedChildren="Classic mode"
+                checked={uiMode.is_classic_mode}
+                onChange={() => {
+                  setUiMode({
+                    ...uiMode,
+                    is_classic_mode: !uiMode.is_classic_mode,
+                  });
+                }}
+              />
+            </Col>
           </Row>
         </Container>
       </div>
