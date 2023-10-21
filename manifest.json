@@ -6,6 +6,9 @@
     },
     "version": "1.0.0",
     "manifest_version": 3,
+    "background": {
+        "service_worker": "./js/background.js"
+    },
     "action": {
         "default_title": "Time Calculator V2",
         "default_popup": "js/index.html",

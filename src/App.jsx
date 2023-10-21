@@ -15,6 +15,7 @@ const App = () => {
 
   let initUiModeData = {
     is_classic_mode: false,
+    is_notification_on: false,
   };
   const [uiMode, setUiMode] = useState(initUiModeData);
 
@@ -210,9 +211,29 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    console.log("🚀 ~ file: App.jsx:215 ~ App ~ uiMode:", uiMode)
     updateUiData();
   }, [uiMode]);
+
+  const generateNotification = () => {
+    let notification_time = dayjs(timeData.leave_time?timeData.leave_time:displayTimeData.finish_at, 'hh:mm A').valueOf()
+    chrome.alarms.clear("time_is_over")
+    if(notification_time>=Date.now()){
+      chrome.alarms.create(
+        "time_is_over",
+        {
+          when: notification_time
+        }
+      )
+    }
+  }
+
+  useEffect(()=>{
+    if(uiMode.is_notification_on && timeData.is_calculation_started && displayTimeData.finish_at){
+      generateNotification()
+    }else{
+      chrome.alarms.clear("time_is_over")
+    }
+  },[uiMode.is_notification_on,timeData.is_calculation_started,displayTimeData.finish_at,timeData.leave_time])
 
   return (
     <>
@@ -573,12 +594,11 @@ const App = () => {
               md={6}
               sm={6}
               xs={6}
-              className="d-flex align-items-center"
+              className="d-flex align-items-center justify-content-end"
             >
-              {/* <Checkbox>Notified me</Checkbox> */}
               <Switch
-                checkedChildren="Fury mode"
-                unCheckedChildren="Classic mode"
+                checkedChildren="Fury"
+                unCheckedChildren="Classic"
                 checked={uiMode.is_classic_mode}
                 onChange={() => {
                   setUiMode({
@@ -587,6 +607,24 @@ const App = () => {
                   });
                 }}
               />
+              {"\u00A0"}
+              {"\u00A0"}
+              {"\u00A0"}
+              <Switch
+                checkedChildren={<>{"\u00A0"}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">
+                <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
+              </svg>{"\u00A0"}</>}
+                unCheckedChildren={<>{"\u00A0"}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-slash" viewBox="0 0 16 16">
+                <path d="M5.164 14H15c-.299-.199-.557-.553-.78-1-.9-1.8-1.22-5.12-1.22-6 0-.264-.02-.523-.06-.776l-.938.938c.02.708.157 2.154.457 3.58.161.767.377 1.566.663 2.258H6.164l-1 1zm5.581-9.91a3.986 3.986 0 0 0-1.948-1.01L8 2.917l-.797.161A4.002 4.002 0 0 0 4 7c0 .628-.134 2.197-.459 3.742-.05.238-.105.479-.166.718l-1.653 1.653c.02-.037.04-.074.059-.113C2.679 11.2 3 7.88 3 7c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0c.942.19 1.788.645 2.457 1.284l-.707.707zM10 15a2 2 0 1 1-4 0h4zm-9.375.625a.53.53 0 0 0 .75.75l14.75-14.75a.53.53 0 0 0-.75-.75L.625 15.625z"/>
+              </svg>{"\u00A0"}</>}
+                checked={uiMode.is_notification_on}
+                onChange={() => {
+                  setUiMode({
+                    ...uiMode,
+                    is_notification_on: !uiMode.is_notification_on,
+                  });
+                }}
+              /> 
             </Col>
           </Row>
         </Container>
