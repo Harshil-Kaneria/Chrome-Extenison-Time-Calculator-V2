@@ -9,10 +9,13 @@ import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
 const App = () => {
+  
   let getCurrentTime = () => dayjs().format("hh:mm:ss A | D MMM YYYY | dddd");
 
   const buttonCalc = useRef(null);
   const [displayTimeInterval, setDisplayTimeInterval] = useState(null);
+  const [currenTime, setCurrentTime] = useState(getCurrentTime());
+  const [allColors,setAllColors ] = useState(["#f5f4ff", "#f8bcc0", "#f6a9cc", "#c2a1d7", "#999ad4", "#89bbf6", "#73c9f9", "#6bd5e3", "#61b5c7", "#89cc98", "#b0d9a1", "#ffec68", "#ffc59e", "#ff8a78"])
 
   let initUiModeData = {
     is_classic_mode: false,
@@ -20,7 +23,6 @@ const App = () => {
     select_color : "#f5f4ff",
   };
   const [uiMode, setUiMode] = useState(initUiModeData);
-  const [allColors,setAllColors ] = useState(["#f5f4ff", "#f8bcc0", "#f6a9cc", "#c2a1d7", "#999ad4", "#89bbf6", "#73c9f9", "#6bd5e3", "#61b5c7", "#89cc98", "#b0d9a1", "#ffec68", "#ffc59e", "#ff8a78"])
 
   let initTimeData = {
     start_time: dayjs("09:00", "HH:mm"),
@@ -41,11 +43,6 @@ const App = () => {
     leave_remaining_percentage: 0,
   };
   const [displayTimeData, setDisplayTimeData] = useState(initDisplayTimeData);
-
-  const [currenTime, setCurrentTime] = useState(getCurrentTime());
-  useEffect(() => {
-    setInterval(() => setCurrentTime(getCurrentTime()), 1000);
-  }, []);
 
   const handleChangeTimeData = (time, key) => {
     setTimeData({
@@ -208,15 +205,6 @@ const App = () => {
     });
   };
 
-  useEffect(() => {
-    getDataFromLocal();
-    getUiDataFromLocal();
-  }, []);
-
-  useEffect(() => {
-    updateUiData();
-  }, [uiMode]);
-
   const generateNotification = () => {
     let notification_time = dayjs(timeData.leave_time?timeData.leave_time:displayTimeData.finish_at, 'hh:mm A').valueOf()
     chrome.alarms.clear("time_is_over")
@@ -229,6 +217,16 @@ const App = () => {
       )
     }
   }
+
+  useEffect(() => {
+    setInterval(() => setCurrentTime(getCurrentTime()), 1000);
+    getDataFromLocal();
+    getUiDataFromLocal();
+  }, []);
+
+  useEffect(() => {
+    updateUiData();
+  }, [uiMode]);
 
   useEffect(()=>{
     if(uiMode.is_notification_on && timeData.is_calculation_started && displayTimeData.finish_at){
@@ -588,7 +586,6 @@ const App = () => {
               <Button
                 ref={buttonCalc}
                 type="primary"
-                ghost
                 icon={<><svg  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" style={{marginTop:"-2px"}} viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/></svg></>}
                 onClick={startCalculate}
               />
