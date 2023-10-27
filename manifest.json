@@ -1,10 +1,10 @@
 {
     "name": "Time Calculator V2",
-	"description": "A simple time calculator for estimation of time",
+	"description": "A simple time calculator for estimation of time with water reminder",
     "icons":{
         "128":"icon.png"
     },
-    "version": "1.0.1",
+    "version": "1.0.2",
     "manifest_version": 3,
     "background": {
         "service_worker": "./js/background.js"
