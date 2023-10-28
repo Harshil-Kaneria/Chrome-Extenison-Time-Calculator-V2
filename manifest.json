@@ -1,6 +1,6 @@
 {
     "name": "Time Calculator V2",
-	"description": "A simple time calculator for estimation of time with water reminder",
+	"description": "Meet Time Calculator, the Chrome extension that helps you manage your time effectively",
     "icons":{
         "128":"icon.png"
     },
