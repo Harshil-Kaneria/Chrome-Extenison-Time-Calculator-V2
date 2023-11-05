@@ -10,6 +10,7 @@ import {
   Button,
   Select,
   Space,
+  Tooltip,
 } from "antd";
 import { Row, Col, Container, Card } from "react-bootstrap";
 import { CirclePicker } from "react-color";
@@ -45,7 +46,7 @@ const App = () => {
     is_notification_on: false,
     select_color: "#f5f4ff",
     is_water_notification_on: false,
-    water_notification_time:"30"
+    water_notification_time: "30",
   };
   const [uiMode, setUiMode] = useState(initUiModeData);
 
@@ -248,10 +249,10 @@ const App = () => {
     if (uiMode.is_water_notification_on) {
       chrome.alarms.create("water_reminder", {
         delayInMinutes: Number(uiMode.water_notification_time),
-        periodInMinutes: Number(uiMode.water_notification_time)
+        periodInMinutes: Number(uiMode.water_notification_time),
       });
     }
-  }
+  };
 
   useEffect(() => {
     setInterval(() => setCurrentTime(getCurrentTime()), 1000);
@@ -274,19 +275,18 @@ const App = () => {
       chrome.alarms.clear("time_is_over");
     }
 
-    if(uiMode.is_water_notification_on){
+    if (uiMode.is_water_notification_on) {
       generateWaterNotification();
-    }else{
+    } else {
       chrome.alarms.clear("water_reminder");
     }
-
   }, [
     uiMode.is_notification_on,
     timeData.is_calculation_started,
     displayTimeData.finish_at,
     timeData.leave_time,
     uiMode.is_water_notification_on,
-    uiMode.water_notification_time
+    uiMode.water_notification_time,
   ]);
 
   return (
@@ -309,15 +309,17 @@ const App = () => {
               <p className="mb-0">
                 <>Start time *</>
               </p>
-              <TimePicker
-                size="large"
-                use12Hours
-                format="h:mm a"
-                onChange={(time) => handleChangeTimeData(time, "start_time")}
-                changeOnBlur={true}
-                defaultValue={timeData.start_time}
-                value={timeData.start_time}
-              />
+              <Tooltip title="This is the time when you start working.">
+                <TimePicker
+                  size="large"
+                  use12Hours
+                  format="h:mm a"
+                  onChange={(time) => handleChangeTimeData(time, "start_time")}
+                  changeOnBlur={true}
+                  defaultValue={timeData.start_time}
+                  value={timeData.start_time}
+                />
+              </Tooltip>
             </Col>
             <Col
               xxl={6}
@@ -331,15 +333,19 @@ const App = () => {
               <p className="mb-0">
                 <>Working time *</>
               </p>
-              <TimePicker
-                size="large"
-                format="HH:mm"
-                showNow={false}
-                onChange={(time) => handleChangeTimeData(time, "working_time")}
-                changeOnBlur={true}
-                defaultValue={timeData.working_time}
-                value={timeData.working_time}
-              />
+              <Tooltip title="This is the total amount of time you want to work.">
+                <TimePicker
+                  size="large"
+                  format="HH:mm"
+                  showNow={false}
+                  onChange={(time) =>
+                    handleChangeTimeData(time, "working_time")
+                  }
+                  changeOnBlur={true}
+                  defaultValue={timeData.working_time}
+                  value={timeData.working_time}
+                />
+              </Tooltip>
             </Col>
             <Col
               xxl={6}
@@ -353,15 +359,17 @@ const App = () => {
               <p className="mb-0">
                 <>Break time *</>
               </p>
-              <TimePicker
-                size="large"
-                format="HH:mm"
-                showNow={false}
-                onChange={(time) => handleChangeTimeData(time, "break_time")}
-                changeOnBlur={true}
-                defaultValue={timeData.break_time}
-                value={timeData.break_time}
-              />
+              <Tooltip title="This is break time that is not counted in working time.">
+                <TimePicker
+                  size="large"
+                  format="HH:mm"
+                  showNow={false}
+                  onChange={(time) => handleChangeTimeData(time, "break_time")}
+                  changeOnBlur={true}
+                  defaultValue={timeData.break_time}
+                  value={timeData.break_time}
+                />
+              </Tooltip>
             </Col>
             <Col
               xxl={6}
@@ -375,15 +383,17 @@ const App = () => {
               <p className="mb-0">
                 <>Leave time</>
               </p>
-              <TimePicker
-                size="large"
-                use12Hours
-                format="h:mm a"
-                onChange={(time) => handleChangeTimeData(time, "leave_time")}
-                changeOnBlur={true}
-                defaultValue={timeData.leave_time}
-                value={timeData.leave_time}
-              />
+              <Tooltip title="This is the time if you want to leave early or arrive late.">
+                <TimePicker
+                  size="large"
+                  use12Hours
+                  format="h:mm a"
+                  onChange={(time) => handleChangeTimeData(time, "leave_time")}
+                  changeOnBlur={true}
+                  defaultValue={timeData.leave_time}
+                  value={timeData.leave_time}
+                />
+              </Tooltip>
             </Col>
           </Row>
 
@@ -619,12 +629,11 @@ const App = () => {
               </Card>
             </>
           )}
-
           <Divider className="mt-3 mb-3" dashed={true}>
             {currenTime}
           </Divider>
-
           <Card className="mb-2">
+          <Tooltip title="Change theme color">
             <Row className="p-1 d-flex justify-content-center">
               <CirclePicker
                 width="auto"
@@ -637,30 +646,43 @@ const App = () => {
                 }}
               />
             </Row>
+            </Tooltip>
           </Card>
-
           <Row className="pb-2">
-            <Col xxl={12} xl={12} lg={12} md={12} sm={12} xs={12} className="d-flex  align-items-center justify-content-between">
-              <Button
-                ref={buttonCalc}
-                type="primary"
-                icon={
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      class="bi bi-play"
-                      style={{ marginTop: "-2px" }}
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
-                    </svg>
-                  </>
-                }
-                onClick={startCalculate}
-              />
+            <Col
+              xxl={12}
+              xl={12}
+              lg={12}
+              md={12}
+              sm={12}
+              xs={12}
+              className="d-flex  align-items-center justify-content-between"
+            >
+              
+              <Tooltip title="Calculate">
+                <Button
+                  ref={buttonCalc}
+                  type="primary"
+                  icon={
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        class="bi bi-play"
+                        style={{ marginTop: "-2px" }}
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z" />
+                      </svg>
+                    </>
+                  }
+                  onClick={startCalculate}
+                />
+              </Tooltip>
+
+              <Tooltip title="Reset">
               <Button
                 type="primary"
                 danger
@@ -682,6 +704,9 @@ const App = () => {
                 }
                 onClick={stopCalculate}
               />
+              </Tooltip>
+
+              <Tooltip title="For water notifications">
               <Space.Compact>
                 <Button
                   icon={
@@ -705,10 +730,16 @@ const App = () => {
                     </svg>
                   }
                 />
-                <Select defaultValue={uiMode.is_water_notification_on} value={uiMode.is_water_notification_on} onChange={(value)=>{setUiMode({
-                  ...uiMode,
-                  is_water_notification_on:value
-                })}}>
+                <Select
+                  defaultValue={uiMode.is_water_notification_on}
+                  value={uiMode.is_water_notification_on}
+                  onChange={(value) => {
+                    setUiMode({
+                      ...uiMode,
+                      is_water_notification_on: value,
+                    });
+                  }}
+                >
                   <Option value={false}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -736,10 +767,17 @@ const App = () => {
                     </svg>
                   </Option>
                 </Select>
-                <Select defaultValue={uiMode.water_notification_time} value={uiMode.water_notification_time} onChange={(value)=>{setUiMode({
-                  ...uiMode,
-                  water_notification_time:value
-                })}} disabled={!uiMode.is_water_notification_on}>
+                <Select
+                  defaultValue={uiMode.water_notification_time}
+                  value={uiMode.water_notification_time}
+                  onChange={(value) => {
+                    setUiMode({
+                      ...uiMode,
+                      water_notification_time: value,
+                    });
+                  }}
+                  disabled={!uiMode.is_water_notification_on}
+                >
                   <Option value="05">05 Min</Option>
                   <Option value="10">10 Min</Option>
                   <Option value="15">15 Min</Option>
@@ -754,6 +792,9 @@ const App = () => {
                   <Option value="60">60 Min</Option>
                 </Select>
               </Space.Compact>
+              </Tooltip>
+
+              <Tooltip title="For switch UI modes">
               <Switch
                 checkedChildren="Fury"
                 unCheckedChildren="Classic"
@@ -765,6 +806,9 @@ const App = () => {
                   });
                 }}
               />
+              </Tooltip>
+              
+              <Tooltip title="Show time is over notification">
               <Switch
                 checkedChildren={
                   <>
@@ -808,6 +852,8 @@ const App = () => {
                   });
                 }}
               />
+              </Tooltip>
+
             </Col>
           </Row>
         </Container>
