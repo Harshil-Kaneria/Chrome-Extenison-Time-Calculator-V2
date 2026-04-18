@@ -7,7 +7,7 @@ chrome.alarms.onAlarm.addListener(
                     type: "basic",
                     iconUrl: "../icon.png",
                     title: "Time Calculator",
-                    message: "Hello there, it looks like you don't see the current time.",
+                    message: "Your planned work session time is up.",
                     silent: false
                 },
                 () => {
@@ -21,7 +21,7 @@ chrome.alarms.onAlarm.addListener(
                     type: "basic",
                     iconUrl: "../icon.png",
                     title: "Water reminder",
-                    message: "Take sip of water please.",
+                    message: "Time for a quick water break.",
                     silent: false
                 }
             )

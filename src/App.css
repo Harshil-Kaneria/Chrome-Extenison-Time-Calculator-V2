@@ -1,16 +1,618 @@
+/* Time Calculator — popup layout (Chrome extension) */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Fixed width: Chrome sizes the popup to content; without this, accordions / wide
+   controls can widen the window when expanded. */
+:root {
+  --tc-popup-width: 400px;
+}
+
+html {
+  width: var(--tc-popup-width);
+  min-width: var(--tc-popup-width);
+  max-width: var(--tc-popup-width);
+  height: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
 body {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  width: var(--tc-popup-width);
+  min-width: var(--tc-popup-width);
+  max-width: var(--tc-popup-width);
+  min-height: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-.main_body{
-    max-width: 500px;
-    min-width: 500px;
-    width: 500px;
+.app-root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  --tc-ink: #0f172a;
+  --tc-ink-soft: #334155;
+  --tc-muted: #64748b;
+  --tc-edge: rgba(148, 163, 184, 0.32);
+  --tc-edge-strong: rgba(100, 116, 139, 0.45);
+  --tc-surface: rgba(255, 255, 255, 0.72);
+  --tc-surface-strong: rgba(255, 255, 255, 0.94);
+  --tc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --tc-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+  --tc-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.09);
+  --tc-accent: #2563eb;
+  --tc-leave: #7c3aed;
+  --tc-radius: 14px;
+  --tc-radius-sm: 11px;
+
+  box-sizing: border-box;
+  min-height: 0;
+  padding: 16px 16px 22px;
+  overflow-x: hidden;
+  padding-bottom: max(22px, env(safe-area-inset-bottom, 0px));
+  color: var(--tc-ink);
+  background-color: #f1f5f9;
 }
 
-.ant-divider-horizontal.ant-divider-with-text-center::before,
-.ant-divider-horizontal.ant-divider-with-text-center::after
-{
-   border-top: 1px solid black;
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--tc-edge);
+}
+
+.app-title.ant-typography {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--tc-ink) !important;
+  font-size: 17px !important;
+  line-height: 1.25 !important;
+}
+
+.app-subclock {
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+  letter-spacing: 0.01em;
+  color: var(--tc-muted) !important;
+}
+
+.app-root .app-header .ant-tag {
+  margin: 0;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-weight: 600;
+  font-size: 11px;
+  border: 1px solid var(--tc-edge);
+  background: var(--tc-surface-strong);
+}
+
+.app-root .app-header .ant-tag-processing {
+  border-color: rgba(37, 99, 235, 0.35);
+  background: linear-gradient(135deg, rgba(219, 234, 254, 0.9), rgba(255, 255, 255, 0.95));
+}
+
+.app-section {
+  margin-bottom: 16px;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--tc-muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preset-segmented {
+  margin-bottom: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.preset-segmented.ant-segmented {
+  width: 100% !important;
+}
+
+.preset-segmented .ant-segmented-item {
+  font-size: 11px;
+  line-height: 1.25;
+  padding: 7px 6px;
+  font-weight: 500;
+}
+
+.preset-segmented .ant-segmented-thumb {
+  border-radius: 8px !important;
+}
+
+.btn-start-now {
+  margin-top: 6px;
+  border-style: dashed !important;
+  border-radius: var(--tc-radius-sm) !important;
+  font-weight: 500 !important;
+}
+
+.app-form .field-grid {
+  display: grid;
+  /* minmax(0,…) lets columns shrink so inner controls don’t force a wider popup */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px 14px;
+  width: 100%;
+  min-width: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tc-ink-soft);
+  letter-spacing: -0.01em;
+}
+
+.field-control {
+  width: 100% !important;
+}
+
+.field-control.ant-picker {
+  border-radius: var(--tc-radius-sm) !important;
+  border-color: var(--tc-edge) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field-control.ant-picker:hover,
+.field-control.ant-picker-focused {
+  border-color: rgba(37, 99, 235, 0.45) !important;
+}
+
+.field-control.ant-picker-focused {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+}
+
+.preview-banner {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--tc-radius-sm);
+  background: var(--tc-surface-strong);
+  border: 1px solid var(--tc-edge);
+  font-size: 12px;
+  box-shadow: var(--tc-shadow-sm);
+}
+
+.app-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.btn-primary-action.ant-btn-lg {
+  height: 46px;
+  font-weight: 600;
+  border-radius: var(--tc-radius-sm) !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+  letter-spacing: -0.01em;
+}
+
+.app-actions .ant-btn-dangerous {
+  border-radius: var(--tc-radius-sm) !important;
+  font-weight: 500;
+}
+
+.results .section-label {
+  margin-bottom: 10px;
+}
+
+.live-first {
+  margin-bottom: 12px;
+}
+
+.live-first .result-card.primary-metric {
+  background: linear-gradient(165deg, var(--tc-surface-strong) 0%, rgba(255, 255, 255, 0.88) 100%);
+  border-color: rgba(37, 99, 235, 0.22);
+}
+
+.hero-percent {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--tc-ink);
+  margin-bottom: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-percent-suffix {
+  font-size: 0.45em;
+  font-weight: 700;
+  margin-left: 2px;
+  opacity: 0.82;
+}
+
+.detailed-hero {
+  margin-bottom: 10px;
+}
+
+.schedule-collapse {
+  margin-bottom: 12px !important;
+  background: var(--tc-surface) !important;
+  border-radius: var(--tc-radius) !important;
+  border: 1px solid var(--tc-edge) !important;
+  padding: 2px 12px 4px !important;
+  box-shadow: var(--tc-shadow-sm);
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.schedule-collapse .ant-collapse-header {
+  padding: 12px 4px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  color: var(--tc-ink-soft) !important;
+  border-radius: var(--tc-radius) !important;
+  transition: background 0.15s ease;
+}
+
+.schedule-collapse .ant-collapse-header:hover {
+  background: rgba(255, 255, 255, 0.35) !important;
+}
+
+.schedule-collapse .ant-collapse-content-box {
+  padding-top: 0 !important;
+}
+
+.result-cards.compact {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.result-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.result-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tc-muted);
+  padding-left: 2px;
+}
+
+.result-group--leave .result-group-label {
+  color: #6d28d9;
+}
+
+.result-card {
+  position: relative;
+  background: var(--tc-surface);
+  border: 1px solid var(--tc-edge);
+  border-radius: var(--tc-radius);
+  padding: 14px 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--tc-shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.result-card:hover {
+  border-color: rgba(148, 163, 184, 0.45);
+  box-shadow: var(--tc-shadow);
+}
+
+.result-card.primary-metric {
+  border-color: rgba(37, 99, 235, 0.2);
+  box-shadow: var(--tc-shadow);
+}
+
+.result-card--stat {
+  padding: 12px 16px;
+}
+
+.result-card--leave {
+  border-color: rgba(124, 58, 237, 0.22);
+  background: linear-gradient(165deg, rgba(250, 245, 255, 0.65), var(--tc-surface));
+}
+
+.result-card--leave:hover {
+  border-color: rgba(124, 58, 237, 0.32);
+}
+
+.metric-label.ant-typography {
+  display: block;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tc-muted) !important;
+  margin-bottom: 2px !important;
+}
+
+.metric-value {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin: 6px 0 10px;
+  color: var(--tc-ink);
+}
+
+.metric-value.secondary {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.metric-value--tabular {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.metric-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  margin: 8px 0 12px;
+}
+
+.metric-pair-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(124, 58, 237, 0.12);
+}
+
+.metric-pair-k {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tc-muted);
+}
+
+.metric-pair-v {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--tc-ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.metric-hint {
+  font-size: 11px !important;
+  display: block;
+  margin-top: 6px !important;
+  letter-spacing: 0.01em;
+}
+
+.sep {
+  opacity: 0.45;
+  margin: 0 4px;
+}
+
+.result-cards.detailed {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.result-panel {
+  position: relative;
+  background: var(--tc-surface-strong);
+  border: 1px solid var(--tc-edge);
+  border-radius: var(--tc-radius);
+  padding: 14px 16px 16px;
+  box-shadow: var(--tc-shadow-sm);
+}
+
+.result-panel--leave {
+  border-color: rgba(124, 58, 237, 0.2);
+  background: linear-gradient(165deg, rgba(250, 245, 255, 0.5), var(--tc-surface-strong));
+}
+
+.result-panel-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tc-muted);
+  margin-bottom: 8px;
+}
+
+.result-panel-badge--leave {
+  color: #6d28d9;
+}
+
+.result-panel-title.ant-typography {
+  margin-top: 0 !important;
+  margin-bottom: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--tc-ink) !important;
+}
+
+.result-panel .ant-typography {
+  margin-top: 0 !important;
+}
+
+.panel-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  margin-bottom: 10px;
+  color: var(--tc-ink-soft);
+}
+
+.panel-row:last-of-type {
+  margin-bottom: 12px;
+}
+
+.panel-row strong {
+  color: var(--tc-ink);
+  font-weight: 600;
+  text-align: right;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-collapse {
+  background: transparent !important;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.settings-collapse .ant-collapse-item {
+  border: none !important;
+}
+
+.settings-collapse .ant-collapse-header {
+  padding: 10px 2px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  color: var(--tc-ink-soft) !important;
+  border-radius: var(--tc-radius-sm) !important;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.settings-collapse .ant-collapse-header:hover {
+  color: var(--tc-ink) !important;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.settings-collapse .ant-collapse-content-box {
+  padding: 4px 2px 10px !important;
+}
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: var(--tc-radius-sm);
+  background: var(--tc-surface);
+  border: 1px solid var(--tc-edge);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.theme-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--tc-radius-sm);
+  background: var(--tc-surface);
+  border: 1px solid var(--tc-edge);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.theme-row .circle-picker {
+  justify-content: flex-start !important;
+}
+
+/* Ant Design Progress — softer track, pill caps */
+.app-root .ant-progress-inner {
+  border-radius: 999px !important;
+  background: rgba(148, 163, 184, 0.18) !important;
+}
+
+.app-root .ant-progress-bg {
+  border-radius: 999px !important;
+}
+
+.app-root .ant-progress-line {
+  margin-bottom: 0;
+}
+
+/* Ant Collapse: keep panel width stable when expanded */
+.app-root .ant-collapse {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.app-root .ant-collapse-item {
+  max-width: 100%;
+}
+
+.app-root .ant-collapse-content {
+  max-width: 100%;
+}
+
+.app-root .ant-collapse-content > .ant-collapse-content-box {
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.app-root .ant-collapse-header {
+  max-width: 100%;
+  align-items: flex-start !important;
+}
+
+.app-root .ant-collapse-expand-icon {
+  flex-shrink: 0;
+}
+
+.app-root .ant-collapse-header-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Stack fields only when unusually narrow (zoom / future smaller --tc-popup-width) */
+@media (max-width: 360px) {
+  .app-form .field-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .metric-pair {
+    grid-template-columns: 1fr;
+  }
 }
