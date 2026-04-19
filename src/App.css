@@ -38,16 +38,64 @@ html {
   background-color: rgba(15, 23, 42, 0.25);
 }
 
+/* Custom sleek scrollbar to stop jumpiness */
+::-webkit-scrollbar {
+  width: 6px;
+  background-color: transparent;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(15, 23, 42, 0.15);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(15, 23, 42, 0.25);
+}
+
 body {
   margin: 0;
   width: var(--tc-popup-width);
   min-width: var(--tc-popup-width);
   max-width: var(--tc-popup-width);
-  min-height: 0;
+  height: 100%;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  overflow-y: scroll; /* Forces scrollbar track to maintain consistent width */
+  overflow-y: auto;
+}
+
+/* Custom sleek scrollbar to stop jumpiness */
+::-webkit-scrollbar {
+  width: 6px;
+  background-color: transparent;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(15, 23, 42, 0.15);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(15, 23, 42, 0.25);
+}
+
+/* Custom sleek scrollbar to stop jumpiness */
+::-webkit-scrollbar {
+  width: 6px;
+  background-color: transparent;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(15, 23, 42, 0.15);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(15, 23, 42, 0.25);
 }
 
 .app-root {
@@ -633,4 +681,56 @@ body {
   .metric-pair {
     grid-template-columns: 1fr;
   }
+}
+
+/* Splash Screen */
+.splash-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--surface-tint, #e8f4fc) 0%, rgba(255, 255, 255, 0.95) 100%);
+  backdrop-filter: blur(8px);
+  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+.splash-fade {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.splash-logo-img {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 24px;
+  object-fit: contain;
+  opacity: 0;
+  animation: elegant-fade-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s forwards;
+  filter: drop-shadow(0 8px 16px rgba(15, 23, 42, 0.15));
+}
+
+.splash-title-pro {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--tc-ink-soft);
+  opacity: 0;
+  animation: slide-up-elegant 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+}
+
+@keyframes elegant-fade-in {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slide-up-elegant {
+  0% { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }

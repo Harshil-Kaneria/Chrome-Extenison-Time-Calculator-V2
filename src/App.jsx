@@ -12,6 +12,7 @@ import {
   Segmented,
   Collapse,
   Tag,
+  Popconfirm,
 } from "antd";
 import { CirclePicker } from "react-color";
 import dayjs from "dayjs";
@@ -58,16 +59,26 @@ const PRESETS = [
 ];
 
 const SWATCHES = [
-  "#f5f4ff",
-  "#e8f4fc",
-  "#f0fdf4",
-  "#fff7ed",
-  "#fce7f3",
-  "#ddd6fe",
-  "#bae6fd",
-  "#a7f3d0",
-  "#fed7aa",
-  "#fecaca",
+  "#f5f4ff", // soft violet
+  "#e8f4fc", // soft blue
+  "#f0fdf4", // soft green
+  "#fff7ed", // soft orange
+  "#fce7f3", // soft pink
+  "#ddd6fe", // light purple
+  "#bae6fd", // light cyan
+  "#a7f3d0", // light mint
+  "#fed7aa", // pale peach
+  "#fecaca", // pale rose
+  "#d9f99d", // lime
+  "#fef08a", // yellow
+  "#e9d5ff", // fuchsia pastel
+  "#c7d2fe", // indigo pastel
+  "#99f6e4", // teal pastel
+  "#fbcfe8", // bright pink
+  "#fda4af", // rose
+  "#e5e7eb", // gray
+  "#fcd34d", // amber
+  "#d8b4fe", // light purple
 ];
 
 function buildDayjsTime(h, m, isDuration = false) {
@@ -110,6 +121,12 @@ export default function App() {
   const [uiMode, setUiMode] = useState(initUiMode);
   const [displayTimeData, setDisplayTimeData] = useState(initDisplayTimeData);
   const displayTimeInterval = useRef(null);
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const splashTimer = setTimeout(() => setShowSplash(false), 1200);
+    return () => clearTimeout(splashTimer);
+  }, []);
 
   useEffect(() => {
     timeDataRef.current = timeData;
@@ -419,9 +436,10 @@ export default function App() {
             <Tooltip title="Hours and minutes you need to work (billable or core hours).">
               <TimePicker
                 className="field-control"
-                format="HH:mm"
+                format="H[h] m[m]"
+                placeholder="8h 0m"
                 showNow={false}
-                minuteStep={1}
+                minuteStep={5}
                 value={timeData.working_time}
                 onChange={(t) => handleChangeTimeData(t, "working_time")}
               />
@@ -432,9 +450,10 @@ export default function App() {
             <Tooltip title="Lunch and other breaks added on top of work time.">
               <TimePicker
                 className="field-control"
-                format="HH:mm"
+                format="H[h] m[m]"
+                placeholder="0h 30m"
                 showNow={false}
-                minuteStep={1}
+                minuteStep={5}
                 value={timeData.break_time}
                 onChange={(t) => handleChangeTimeData(t, "break_time")}
               />
@@ -473,9 +492,18 @@ export default function App() {
         >
           {isTracking ? "Recalculate & continue" : "Start tracking"}
         </Button>
-        <Button danger size="large" icon={<StopOutlined />} onClick={stopCalculate} block>
-          Reset session
-        </Button>
+        <Popconfirm
+          title="End working session?"
+          description="Are you sure you want to completely stop and reset tracking?"
+          onConfirm={stopCalculate}
+          okText="Yes, Reset"
+          cancelText="No"
+          placement="bottom"
+        >
+          <Button danger size="large" icon={<StopOutlined />} block>
+            Reset session
+          </Button>
+        </Popconfirm>
       </section>
     </>
   );
@@ -637,6 +665,11 @@ export default function App() {
           background: gradientBg,
         }}
       >
+        <div className={`splash-screen ${!showSplash ? "splash-fade" : ""}`}>
+           <img src="../icon.png" alt="Time Calculator Logo" className="splash-logo-img" />
+           <div className="splash-title-pro">Time Calculator</div>
+        </div>
+
         <header className="app-header">
           <div>
             <Title level={5} className="app-title" style={{ margin: 0 }}>
