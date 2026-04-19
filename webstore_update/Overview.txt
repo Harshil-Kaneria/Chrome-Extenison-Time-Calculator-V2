@@ -1,0 +1,19 @@
+Meet Time Calculator V2, the beautifully simple Chrome extension that helps you track your work hours and manage your time without the hassle.
+
+Whether you're working a standard 9 to 5, doing a half-day, or managing flexible hours, Time Calculator is here to make your day completely predictable and stress-free.
+
+🚀 What's New in Version 2!
+⭐️ Beautiful Redesign: A gorgeous new look with smooth progress bars and 20 custom background colors.
+⭐️ Quick Setup Presets: One click to set up a "9 to 5", "8 hours + break", or "Half Day" schedule.
+⭐️ Start Work at Now: Just click one button when you sit at your desk to start tracking immediately.
+⭐️ Leave Targets: Need to log off at exactly 5 PM? Set a "Leave by" time to see a secondary progress bar showing the time you have left.
+⭐️ Compact & Detailed Modes: Choose how much information you see on your dashboard. 
+
+⭐️ Core Features:
+⭐️ Real-time Time Tracking: Keep a close eye on your progress to effectively manage your valuable time.
+⭐️ Timely Alerts: Get a browser notification automatically when your work time is up.
+⭐️ Water Reminder: Turn on the built-in reminder to help you stay hydrated throughout your workday.
+⭐️ Customizable Time Limits: Easily log your working hours, add your break time, and you're good to go.
+⭐️ Runs in the Background: Even if you close the extension, your timers keep running safely and accurately.
+
+With Time Calculator, you'll never lose track of time again or forget to take your breaks. Download now and start managing your most valuable asset—your time!
