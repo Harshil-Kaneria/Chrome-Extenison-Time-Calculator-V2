@@ -109,7 +109,7 @@ export default function App() {
   const timeDataRef = useRef(timeData);
   const [uiMode, setUiMode] = useState(initUiMode);
   const [displayTimeData, setDisplayTimeData] = useState(initDisplayTimeData);
-  const [displayTimeInterval, setDisplayTimeInterval] = useState(null);
+  const displayTimeInterval = useRef(null);
 
   useEffect(() => {
     timeDataRef.current = timeData;
@@ -136,10 +136,10 @@ export default function App() {
   }, []);
 
   const stopCalculate = useCallback(() => {
-    if (displayTimeInterval != null) {
-      clearInterval(displayTimeInterval);
+    if (displayTimeInterval.current != null) {
+      clearInterval(displayTimeInterval.current);
     }
-    setDisplayTimeInterval(null);
+    displayTimeInterval.current = null;
     const reset = {
       start_time: initTimeData.start_time.clone(),
       working_time: initTimeData.working_time.clone(),
@@ -151,7 +151,7 @@ export default function App() {
     setTimeData(reset);
     setDisplayTimeData(initDisplayTimeData);
     chrome.storage.sync.set({ time_calc_data: null });
-  }, [displayTimeInterval]);
+  }, []);
 
   const tick = useCallback(() => {
     const td = timeDataRef.current;
@@ -220,18 +220,18 @@ export default function App() {
           chrome.storage.sync.set({ time_calc_data: next });
         }
 
-        if (displayTimeInterval != null) {
-          clearInterval(displayTimeInterval);
+        if (displayTimeInterval.current != null) {
+          clearInterval(displayTimeInterval.current);
         }
 
         tick();
         const id = setInterval(tick, 1000);
-        setDisplayTimeInterval(id);
+        displayTimeInterval.current = id;
       } catch {
         stopCalculate();
       }
     },
-    [displayTimeInterval, tick, stopCalculate]
+    [tick, stopCalculate]
   );
 
   const startCalculateRef = useRef(startCalculate);
@@ -282,11 +282,11 @@ export default function App() {
 
   useEffect(() => {
     return () => {
-      if (displayTimeInterval != null) {
-        clearInterval(displayTimeInterval);
+      if (displayTimeInterval.current != null) {
+        clearInterval(displayTimeInterval.current);
       }
     };
-  }, [displayTimeInterval]);
+  }, []);
 
   useEffect(() => {
     const c = setInterval(() => setClock(dayjs().format("h:mm:ss A · ddd, MMM D")), 1000);
